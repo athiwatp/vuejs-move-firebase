@@ -1,19 +1,19 @@
 <template>
 
-  <div 
-  draggable="true" 
-  class="avatar" 
-  :style="{'background': avatar.color, 'top': avatar.y + 'px', 'left': avatar.x + 'px'}" 
+  <div
+  draggable="true"
+  class="avatar"
+  :style="{'background': avatar.color, 'top': avatar.y + 'px', 'left': avatar.x + 'px'}"
   v-for="avatar in avatars">
    {{ avatar.text }}
   </div>
-  
-  <div 
-  class="bg" 
-  @dragover.prevent 
+
+  <div
+  class="bg"
+  @dragover.prevent
   @drop="drop"></div>
 
-<div class="textArea">
+<div class="textArea" @keyup.enter="addText(avatarText)">
       <input type="text" v-model="avatarText">
       <button @click="addText(avatarText)">Send</button>
 </div>
@@ -21,6 +21,7 @@
 </template>
 
 <script>
+/*global Audio*/
 import firebase from 'firebase'
 
 var config = {
@@ -33,7 +34,7 @@ var config = {
 firebase.initializeApp(config)
 
 var Avatars = firebase.database().ref('avatars')
-
+var noti = new Audio('./../static/noti.mp3')
 export default {
   ready () {
     let vm = this
@@ -50,6 +51,7 @@ export default {
       avatar.x = snapshot.val().x
       avatar.y = snapshot.val().y
       avatar.text = snapshot.val().text
+      noti.play()
       if (vm.myAvatar.id === id) {
         vm.myAvatar.x = snapshot.val().x
         vm.myAvatar.y = snapshot.val().y
@@ -105,6 +107,7 @@ export default {
       firebase.database().ref('avatars/' + vm.myAvatar.id).update({
         text: myAvatarText
       })
+      this.avatarText = ''
     }
   }
 }
@@ -128,12 +131,4 @@ export default {
       .textArea { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
       .textArea input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
       .textArea button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-/*input[type="text"] {
-    border: 1px solid #ddd;
-    font-size: 11px;
-    width: 125px;
-    text-transform: uppercase;
-    margin-top: 20px;
-    margin-left: -48px;
-}*/
 </style>
